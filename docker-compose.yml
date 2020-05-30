@@ -1,0 +1,29 @@
+version: '3'
+services:
+  db:
+    image: 'postgres:10.9'
+    volumes:
+      - "thingiverse_database:/var/lib/postgresql/data/"
+    expose:
+      - "5432"
+    ports:
+    - "5560:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+      POSTGRES_DB: things
+    restart: always
+  app:
+    build: ./thingiverse_pro
+    volumes:
+      - "./html:/html/"
+      - "./thingiverse_pro/last_nb/:/last_nb/"
+    depends_on:
+      - db
+    command: bash -c "./wait-for-it.sh db:5432 -- scrapy crawl things"
+    restart: always
+
+volumes:
+  thingiverse_database:
+    external: true 
+
